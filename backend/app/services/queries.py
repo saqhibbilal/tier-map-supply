@@ -92,6 +92,7 @@ def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict
     UNWIND allNodes AS node
     WITH collect(DISTINCT node) AS finalNodes
     UNWIND finalNodes AS node
+    WITH node
     WHERE node IS NOT NULL AND node.id IS NOT NULL
     RETURN DISTINCT node
     """
@@ -103,6 +104,7 @@ def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict
     UNWIND CASE WHEN p IS NOT NULL THEN relationships(p) ELSE [] END AS r
     WITH collect(DISTINCT r) AS supplyRels
     UNWIND supplyRels AS r
+    WITH r
     WHERE r IS NOT NULL
     RETURN DISTINCT startNode(r).id AS from_id, endNode(r).id AS to_id, type(r) AS type
     UNION
@@ -146,6 +148,7 @@ def get_impact(scenario: str, target_id: str) -> tuple[list[dict], list[dict]]:
         OPTIONAL MATCH path = (s)-[:SUPPLIES_TO*1..4]->(downstream)
         UNWIND collect(path) AS p
         UNWIND CASE WHEN p IS NOT NULL THEN relationships(p) ELSE [] END AS r
+        WITH r
         WHERE r IS NOT NULL
         RETURN DISTINCT startNode(r).id AS from_id, endNode(r).id AS to_id, type(r) AS type
         """
@@ -161,6 +164,7 @@ def get_impact(scenario: str, target_id: str) -> tuple[list[dict], list[dict]]:
         UNWIND CASE WHEN path IS NOT NULL THEN nodes(path) ELSE [] END AS n
         WITH [p] + origins + collect(DISTINCT n) AS allNodes
         UNWIND allNodes AS node
+        WITH node
         WHERE node IS NOT NULL AND node.id IS NOT NULL
         RETURN DISTINCT node
         """
@@ -171,6 +175,7 @@ def get_impact(scenario: str, target_id: str) -> tuple[list[dict], list[dict]]:
         WITH collect(path) AS paths
         UNWIND paths AS path
         UNWIND CASE WHEN path IS NOT NULL THEN relationships(path) ELSE [] END AS r
+        WITH r
         WHERE r IS NOT NULL
         RETURN DISTINCT startNode(r).id AS from_id, endNode(r).id AS to_id, type(r) AS type
         UNION
