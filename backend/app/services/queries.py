@@ -10,8 +10,8 @@ def _node_to_map_node(record) -> dict:
     labels = list(node.labels) if hasattr(node, "labels") else []
     node_type = labels[0] if labels else "Unknown"
     return {
-        "id": node.get("id", ""),
-        "name": node.get("name", ""),
+        "id": node.get("id") or "",
+        "name": node.get("name") or "",
         "type": node_type,
         "tier": node.get("tier"),
         "lat": node.get("lat"),
@@ -82,7 +82,7 @@ def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict
     WITH c, collect(DISTINCT path) AS paths
     UNWIND paths AS p
     UNWIND CASE WHEN p IS NOT NULL THEN nodes(p) ELSE [] END AS n
-    WITH collect(DISTINCT n) + c AS baseNodes
+    WITH collect(DISTINCT n) + [c] AS baseNodes
     UNWIND baseNodes AS bn
     WITH collect(DISTINCT bn) AS chainNodes
     UNWIND chainNodes AS n
@@ -107,7 +107,7 @@ def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict
     RETURN DISTINCT startNode(r).id AS from_id, endNode(r).id AS to_id, type(r) AS type
     UNION
     MATCH (c:Company { id: $company_id })<-[:SUPPLIES_TO*1..$depth]-(upstream)
-    WITH collect(DISTINCT upstream) + c AS chainNodes
+    WITH collect(DISTINCT upstream) + [c] AS chainNodes
     UNWIND chainNodes AS n
     MATCH (n)-[r:LOCATED_IN|SHIPS_VIA]->(other)
     RETURN DISTINCT startNode(r).id AS from_id, endNode(r).id AS to_id, type(r) AS type
