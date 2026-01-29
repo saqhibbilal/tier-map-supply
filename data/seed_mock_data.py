@@ -23,16 +23,13 @@ def run_schema(driver):
     """Apply schema.cypher (constraints and indexes)."""
     schema_path = Path(__file__).parent / "schema.cypher"
     text = schema_path.read_text()
-    # Split by semicolon, strip comments and empty lines
-    statements = [
-        s.strip()
-        for s in text.split(";")
-        if s.strip() and not s.strip().startswith("//")
-    ]
+    # Drop comment lines so semicolons inside comments don't split statements
+    lines = [line for line in text.splitlines() if not line.strip().startswith("//")]
+    text_clean = "\n".join(lines)
+    statements = [s.strip() for s in text_clean.split(";") if s.strip()]
     with driver.session() as session:
         for stmt in statements:
-            if stmt:
-                session.run(stmt)
+            session.run(stmt)
 
 
 def clear_graph(driver):
