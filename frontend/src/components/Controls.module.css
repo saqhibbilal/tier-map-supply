@@ -1,0 +1,56 @@
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #64748b;
+}
+
+.select {
+  min-width: 160px;
+  padding: 6px 10px;
+  font-size: 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fff;
+  color: #1a1a1a;
+}
+
+.select:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #0f172a;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  background: #1e293b;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}

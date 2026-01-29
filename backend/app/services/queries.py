@@ -51,6 +51,24 @@ def list_companies() -> list[dict]:
         return [dict(record) for record in result]
 
 
+def list_suppliers() -> list[dict]:
+    """Return all suppliers for impact target dropdown."""
+    driver = get_driver()
+    q = "MATCH (s:Supplier) RETURN s.id AS id, s.name AS name ORDER BY s.name"
+    with driver.session() as session:
+        result = session.run(q)
+        return [dict(record) for record in result]
+
+
+def list_ports() -> list[dict]:
+    """Return all ports for impact target dropdown."""
+    driver = get_driver()
+    q = "MATCH (p:Port) RETURN p.id AS id, p.name AS name ORDER BY p.name"
+    with driver.session() as session:
+        result = session.run(q)
+        return [dict(record) for record in result]
+
+
 def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict]]:
     """Return (nodes, edges) for supply chain: company + upstream via SUPPLIES_TO up to depth.
     Includes LOCATED_IN and SHIPS_VIA for map context.
