@@ -50,3 +50,27 @@ python data/seed_mock_data.py
 ```
 
 The script creates: 3 companies, Tier-1–4 suppliers, factories, ports, and countries, with `SUPPLIES_TO`, `DEPENDS_ON`, `SHIPS_VIA`, and `LOCATED_IN` relationships so variable-depth traversals return plausible paths.
+
+---
+
+## Phase 2: FastAPI backend
+
+From the project root, with Neo4j running and graph seeded:
+
+```bash
+cd backend
+python -m venv .venv
+.venv\Scripts\activate   # Windows
+# source .venv/bin/activate   # macOS/Linux
+pip install -r requirements.txt
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+```
+
+- **API:** http://localhost:8000
+- **Docs:** http://localhost:8000/docs
+
+Endpoints:
+
+- `GET /api/companies` — list companies for dropdowns
+- `POST /api/supply-chain` — body `{ "company_id": "acme", "depth": 4 }` → nodes and edges for the map
+- `POST /api/impact` — body `{ "scenario": "supplier_failure"|"port_closure", "target_id": "..." }` → impacted nodes and edges
