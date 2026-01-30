@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import styles from "./Controls.module.css";
 
 export default function Controls({
@@ -15,6 +16,11 @@ export default function Controls({
   onTargetChange,
   onLoad,
 }) {
+  const [showImpact, setShowImpact] = useState(false);
+  useEffect(() => {
+    if (scenario) setShowImpact(true);
+  }, [scenario]);
+
   const canLoadSupplyChain = companyId && scenario === "";
   const canLoadImpact = scenario && targetId;
   const canLoad = canLoadSupplyChain || canLoadImpact;
@@ -52,57 +58,84 @@ export default function Controls({
           ))}
         </select>
       </div>
-      <div className={styles.row}>
-        <label className={styles.label}>View</label>
-        <select
-          className={styles.select}
-          value={scenario}
-          onChange={(e) => {
-            onScenarioChange(e.target.value);
-            onTargetChange("");
-          }}
-          disabled={loading}
-        >
-          <option value="">Supply chain map</option>
-          <option value="supplier_failure">If supplier fails</option>
-          <option value="port_closure">If port closes</option>
-        </select>
-      </div>
-      {scenario === "supplier_failure" && (
+      {!showImpact ? (
         <div className={styles.row}>
-          <label className={styles.label}>Which supplier</label>
-          <select
-            className={styles.select}
-            value={targetId}
-            onChange={(e) => onTargetChange(e.target.value)}
-            disabled={loading}
+          <button
+            type="button"
+            className={styles.linkBtn}
+            onClick={() => setShowImpact(true)}
           >
-            <option value="">Choose supplier</option>
-            {(suppliers || []).map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select>
+            + Show impact scenario
+          </button>
         </div>
-      )}
-      {scenario === "port_closure" && (
-        <div className={styles.row}>
-          <label className={styles.label}>Which port</label>
-          <select
-            className={styles.select}
-            value={targetId}
-            onChange={(e) => onTargetChange(e.target.value)}
-            disabled={loading}
-          >
-            <option value="">Choose port</option>
-            {(ports || []).map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
+      ) : (
+        <>
+          <div className={styles.row}>
+            <label className={styles.label}>View</label>
+            <select
+              className={styles.select}
+              value={scenario}
+              onChange={(e) => {
+                onScenarioChange(e.target.value);
+                onTargetChange("");
+              }}
+              disabled={loading}
+            >
+              <option value="">Supply chain map</option>
+              <option value="supplier_failure">If supplier fails</option>
+              <option value="port_closure">If port closes</option>
+            </select>
+          </div>
+          {scenario === "supplier_failure" && (
+            <div className={styles.row}>
+              <label className={styles.label}>Which supplier</label>
+              <select
+                className={styles.select}
+                value={targetId}
+                onChange={(e) => onTargetChange(e.target.value)}
+                disabled={loading}
+              >
+                <option value="">Choose supplier</option>
+                {(suppliers || []).map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          {scenario === "port_closure" && (
+            <div className={styles.row}>
+              <label className={styles.label}>Which port</label>
+              <select
+                className={styles.select}
+                value={targetId}
+                onChange={(e) => onTargetChange(e.target.value)}
+                disabled={loading}
+              >
+                <option value="">Choose port</option>
+                {(ports || []).map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div className={styles.row}>
+            <button
+              type="button"
+              className={styles.linkBtn}
+              onClick={() => {
+                setShowImpact(false);
+                onScenarioChange("");
+                onTargetChange("");
+              }}
+            >
+              − Hide impact
+            </button>
+          </div>
+        </>
       )}
       <div className={styles.row}>
         <button

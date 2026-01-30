@@ -6,6 +6,7 @@ export default function Legend() {
     <div className={styles.legend}>
       <div className={styles.title}>Tiers</div>
       <div className={styles.subtitle}>Tier 1 = direct supplier; higher = further upstream.</div>
+      <div className={styles.subtitle}>Click a node to highlight its connections.</div>
       {LEGEND_ITEMS.map(({ label, color }) => (
         <div key={label} className={styles.item}>
           <span className={styles.dot} style={{ backgroundColor: color }} />
