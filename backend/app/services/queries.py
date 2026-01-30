@@ -151,7 +151,8 @@ def get_impact(scenario: str, target_id: str) -> tuple[list[dict], list[dict]]:
         edges_q = """
         MATCH (s:Supplier { id: $target_id })
         OPTIONAL MATCH path = (s)-[:SUPPLIES_TO*1..4]->(downstream)
-        UNWIND collect(path) AS p
+        WITH collect(path) AS paths
+        UNWIND paths AS p
         UNWIND CASE WHEN p IS NOT NULL THEN relationships(p) ELSE [] END AS r
         WITH r
         WHERE r IS NOT NULL
