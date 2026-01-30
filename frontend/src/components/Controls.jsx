@@ -22,14 +22,14 @@ export default function Controls({
   return (
     <div className={styles.controls}>
       <div className={styles.row}>
-        <label className={styles.label}>Company</label>
+        <label className={styles.label}>Focal company</label>
         <select
           className={styles.select}
           value={companyId}
           onChange={(e) => onCompanyChange(e.target.value)}
           disabled={loading}
         >
-          <option value="">Select company</option>
+          <option value="">Choose company</option>
           {(companies || []).map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -38,7 +38,7 @@ export default function Controls({
         </select>
       </div>
       <div className={styles.row}>
-        <label className={styles.label}>Depth (tiers)</label>
+        <label className={styles.label}>Upstream tiers</label>
         <select
           className={styles.select}
           value={depth}
@@ -47,13 +47,13 @@ export default function Controls({
         >
           {[1, 2, 3, 4].map((d) => (
             <option key={d} value={d}>
-              {d}
+              {d} tier{d !== 1 ? "s" : ""}
             </option>
           ))}
         </select>
       </div>
       <div className={styles.row}>
-        <label className={styles.label}>Scenario</label>
+        <label className={styles.label}>View</label>
         <select
           className={styles.select}
           value={scenario}
@@ -63,21 +63,21 @@ export default function Controls({
           }}
           disabled={loading}
         >
-          <option value="">Supply chain only</option>
-          <option value="supplier_failure">Supplier failure</option>
-          <option value="port_closure">Port closure</option>
+          <option value="">Supply chain map</option>
+          <option value="supplier_failure">If supplier fails</option>
+          <option value="port_closure">If port closes</option>
         </select>
       </div>
       {scenario === "supplier_failure" && (
         <div className={styles.row}>
-          <label className={styles.label}>Supplier</label>
+          <label className={styles.label}>Which supplier</label>
           <select
             className={styles.select}
             value={targetId}
             onChange={(e) => onTargetChange(e.target.value)}
             disabled={loading}
           >
-            <option value="">Select supplier</option>
+            <option value="">Choose supplier</option>
             {(suppliers || []).map((s) => (
               <option key={s.id} value={s.id}>
                 {s.name}
@@ -88,14 +88,14 @@ export default function Controls({
       )}
       {scenario === "port_closure" && (
         <div className={styles.row}>
-          <label className={styles.label}>Port</label>
+          <label className={styles.label}>Which port</label>
           <select
             className={styles.select}
             value={targetId}
             onChange={(e) => onTargetChange(e.target.value)}
             disabled={loading}
           >
-            <option value="">Select port</option>
+            <option value="">Choose port</option>
             {(ports || []).map((p) => (
               <option key={p.id} value={p.id}>
                 {p.name}
@@ -110,7 +110,7 @@ export default function Controls({
           onClick={onLoad}
           disabled={!canLoad || loading}
         >
-          {loading ? "Loading…" : "Load"}
+          {loading ? "Loading…" : "Update map"}
         </button>
       </div>
     </div>

@@ -74,6 +74,17 @@ export default function App() {
           {error}
         </div>
       )}
+      <div className={styles.stateBar}>
+        {nodes.length > 0 ? (
+          <span className={styles.stateMessage}>
+            Showing {nodes.length} nodes · {edges.length} connections
+          </span>
+        ) : (
+          <span className={styles.stateHint}>
+            Select a company and click Load to view the supply chain on the map.
+          </span>
+        )}
+      </div>
       <main className={styles.mapWrap}>
         <SupplyMap nodes={nodes} edges={edges} />
       </main>
