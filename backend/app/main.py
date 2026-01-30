@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -6,10 +7,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.database import close_driver, get_driver
 from app.routes import api_router
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    get_driver().verify_connectivity()
+    try:
+        get_driver().verify_connectivity()
+        logger.info("Neo4j connected")
+    except Exception as e:
+        logger.warning("Neo4j not available at startup: %s. Start Neo4j (docker compose up -d) and retry API calls.", e)
     yield
     close_driver()
 
@@ -31,4 +38,8 @@ app.include_router(api_router)
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    try:
+        get_driver().verify_connectivity()
+        return {"status": "ok", "neo4j": "connected"}
+    except Exception as e:
+        return {"status": "ok", "neo4j": "disconnected", "detail": str(e)}

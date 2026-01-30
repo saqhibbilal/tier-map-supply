@@ -74,21 +74,23 @@ def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict
     Includes LOCATED_IN and SHIPS_VIA for map context.
     """
     driver = get_driver()
-    # 1) All nodes reachable from company via SUPPLIES_TO (upstream) up to depth
-    # 2) From that set, add LOCATED_IN and SHIPS_VIA neighbors (ports, countries)
-    nodes_q = """
-    MATCH (c:Company { id: $company_id })
-    OPTIONAL MATCH path = (c)<-[:SUPPLIES_TO*1..$depth]-(upstream)
+    # Neo4j does not allow parameters in variable-length patterns; use literal.
+    d = min(max(1, depth), 4)
+    nodes_q = f"""
+    MATCH (c:Company {{ id: $company_id }})
+    OPTIONAL MATCH path = (c)<-[:SUPPLIES_TO*1..{d}]-(upstream)
     WITH c, collect(DISTINCT path) AS paths
     UNWIND paths AS p
     UNWIND CASE WHEN p IS NOT NULL THEN nodes(p) ELSE [] END AS n
-    WITH collect(DISTINCT n) + [c] AS baseNodes
+    WITH c, collect(DISTINCT n) AS collected
+    WITH collected + [c] AS baseNodes
     UNWIND baseNodes AS bn
     WITH collect(DISTINCT bn) AS chainNodes
     UNWIND chainNodes AS n
     OPTIONAL MATCH (n)-[:LOCATED_IN]->(country:Country)
     OPTIONAL MATCH (n)-[:SHIPS_VIA]->(port:Port)
-    WITH chainNodes + collect(DISTINCT country) + collect(DISTINCT port) AS allNodes
+    WITH chainNodes, collect(DISTINCT country) AS countries, collect(DISTINCT port) AS ports
+    WITH chainNodes + countries + ports AS allNodes
     UNWIND allNodes AS node
     WITH collect(DISTINCT node) AS finalNodes
     UNWIND finalNodes AS node
@@ -96,9 +98,9 @@ def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict
     WHERE node IS NOT NULL AND node.id IS NOT NULL
     RETURN DISTINCT node
     """
-    edges_q = """
-    MATCH (c:Company { id: $company_id })
-    OPTIONAL MATCH path = (c)<-[:SUPPLIES_TO*1..$depth]-(upstream)
+    edges_q = f"""
+    MATCH (c:Company {{ id: $company_id }})
+    OPTIONAL MATCH path = (c)<-[:SUPPLIES_TO*1..{d}]-(upstream)
     WITH collect(path) AS paths
     UNWIND paths AS p
     UNWIND CASE WHEN p IS NOT NULL THEN relationships(p) ELSE [] END AS r
@@ -108,17 +110,18 @@ def get_supply_chain(company_id: str, depth: int) -> tuple[list[dict], list[dict
     WHERE r IS NOT NULL
     RETURN DISTINCT startNode(r).id AS from_id, endNode(r).id AS to_id, type(r) AS type
     UNION
-    MATCH (c:Company { id: $company_id })<-[:SUPPLIES_TO*1..$depth]-(upstream)
-    WITH collect(DISTINCT upstream) + [c] AS chainNodes
+    MATCH (c:Company {{ id: $company_id }})<-[:SUPPLIES_TO*1..{d}]-(upstream)
+    WITH c, collect(DISTINCT upstream) AS up
+    WITH up + [c] AS chainNodes
     UNWIND chainNodes AS n
     MATCH (n)-[r:LOCATED_IN|SHIPS_VIA]->(other)
     RETURN DISTINCT startNode(r).id AS from_id, endNode(r).id AS to_id, type(r) AS type
     """
     with driver.session() as session:
-        nodes_result = session.run(nodes_q, company_id=company_id, depth=depth)
+        nodes_result = session.run(nodes_q, company_id=company_id)
         nodes = [_node_to_map_node({"node": record["node"]}) for record in nodes_result if record.get("node")]
 
-        edges_result = session.run(edges_q, company_id=company_id, depth=depth)
+        edges_result = session.run(edges_q, company_id=company_id)
         edges = [
             {"from_id": r["from_id"] or "", "to_id": r["to_id"] or "", "type": r["type"]}
             for r in edges_result
@@ -138,8 +141,10 @@ def get_impact(scenario: str, target_id: str) -> tuple[list[dict], list[dict]]:
         WITH s, collect(path) AS paths
         UNWIND paths AS p
         UNWIND CASE WHEN p IS NOT NULL THEN nodes(p) ELSE [] END AS n
-        WITH collect(DISTINCT n) + s AS allNodes
+        WITH s, collect(DISTINCT n) AS collected
+        WITH collected + [s] AS allNodes
         UNWIND allNodes AS node
+        WITH node
         WHERE node IS NOT NULL AND node.id IS NOT NULL
         RETURN DISTINCT node
         """
@@ -162,7 +167,8 @@ def get_impact(scenario: str, target_id: str) -> tuple[list[dict], list[dict]]:
         WITH p, collect(DISTINCT origin) AS origins, collect(path) AS paths
         UNWIND paths AS path
         UNWIND CASE WHEN path IS NOT NULL THEN nodes(path) ELSE [] END AS n
-        WITH [p] + origins + collect(DISTINCT n) AS allNodes
+        WITH p, origins, collect(DISTINCT n) AS collected
+        WITH [p] + origins + collected AS allNodes
         UNWIND allNodes AS node
         WITH node
         WHERE node IS NOT NULL AND node.id IS NOT NULL
