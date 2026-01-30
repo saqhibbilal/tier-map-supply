@@ -3,9 +3,10 @@
   flex-wrap: wrap;
   align-items: flex-end;
   gap: 16px;
-  padding: 12px 16px;
+  padding: 14px 20px;
   background: #fff;
   border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 1px 0 rgba(15, 23, 42, 0.04);
 }
 
 .row {
@@ -15,19 +16,28 @@
 }
 
 .label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #64748b;
+  font-family: "Quantico", sans-serif;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .select {
   min-width: 160px;
-  padding: 6px 10px;
+  padding: 8px 12px;
   font-size: 14px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #cbd5e1;
   border-radius: 6px;
   background: #fff;
-  color: #1a1a1a;
+  color: #1e293b;
+}
+
+.select:focus {
+  outline: none;
+  border-color: #0f172a;
+  box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.1);
 }
 
 .select:disabled {
@@ -36,14 +46,16 @@
 }
 
 .button {
-  padding: 8px 16px;
+  font-family: "Quantico", sans-serif;
+  padding: 8px 18px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 700;
   color: #fff;
   background: #0f172a;
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  letter-spacing: 0.02em;
 }
 
 .button:hover:not(:disabled) {
