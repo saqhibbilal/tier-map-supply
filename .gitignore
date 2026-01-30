@@ -1,6 +1,5 @@
 .env
 .venv
-README.md
 venv
 __pycache__
 *.pyc
@@ -9,5 +8,3 @@ node_modules
 dist
 .DS_Store
 *.log
-
-README.md
